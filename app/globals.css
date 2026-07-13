@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f4f0;
-  --foreground: #24261f;
+  --background: #f3f3f2;
+  --foreground: #212224;
   --surface: #ffffff;
-  --surface-alt: #fbfaf6;
-  --border: #e3e1d6;
-  --border-soft: #ecebe2;
-  --ink-soft: #6e6e60;
-  --ink-faint: #9d9c8d;
-  --accent: #3a4a63;
-  --accent-soft: #e8ebf1;
-  --success: #4b7a5b;
+  --surface-alt: #f8f8f7;
+  --border: #e1e0dd;
+  --border-soft: #ececeb;
+  --ink-soft: #6c6d70;
+  --ink-faint: #9a9b9e;
+  --accent: #2f5fd1;
+  --accent-soft: #e5eafc;
+  --success: #3d8361;
   --danger: #a14b3f;
 }
 
@@ -34,19 +34,50 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #1b1c17;
-    --foreground: #ecebe0;
-    --surface: #222319;
-    --surface-alt: #26271d;
-    --border: #383929;
-    --border-soft: #302f23;
-    --ink-soft: #a3a190;
-    --ink-faint: #706e5e;
-    --accent: #93aad0;
-    --accent-soft: #2a3242;
-    --success: #85b691;
+    --background: #18191b;
+    --foreground: #e8e8e6;
+    --surface: #202124;
+    --surface-alt: #242528;
+    --border: #34353a;
+    --border-soft: #2b2c2f;
+    --ink-soft: #9fa0a3;
+    --ink-faint: #6c6d70;
+    --accent: #7fa1ea;
+    --accent-soft: #253150;
+    --success: #6fbf98;
     --danger: #c17c6f;
   }
+}
+
+/* Explicit choice from the theme toggle always wins over the OS preference above. */
+:root[data-theme="light"] {
+  --background: #f3f3f2;
+  --foreground: #212224;
+  --surface: #ffffff;
+  --surface-alt: #f8f8f7;
+  --border: #e1e0dd;
+  --border-soft: #ececeb;
+  --ink-soft: #6c6d70;
+  --ink-faint: #9a9b9e;
+  --accent: #2f5fd1;
+  --accent-soft: #e5eafc;
+  --success: #3d8361;
+  --danger: #a14b3f;
+}
+
+:root[data-theme="dark"] {
+  --background: #18191b;
+  --foreground: #e8e8e6;
+  --surface: #202124;
+  --surface-alt: #242528;
+  --border: #34353a;
+  --border-soft: #2b2c2f;
+  --ink-soft: #9fa0a3;
+  --ink-faint: #6c6d70;
+  --accent: #7fa1ea;
+  --accent-soft: #253150;
+  --success: #6fbf98;
+  --danger: #c17c6f;
 }
 
 body {
@@ -57,4 +88,14 @@ body {
 
 .font-display {
   font-family: ui-serif, Georgia, "Iowan Old Style", serif;
+}
+
+.theme-toggle-moon {
+  display: none;
+}
+:root[data-theme="dark"] .theme-toggle-sun {
+  display: none;
+}
+:root[data-theme="dark"] .theme-toggle-moon {
+  display: block;
 }
