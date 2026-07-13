@@ -3,16 +3,21 @@
 import { useState } from "react";
 import type { Review } from "@/app/_lib/types";
 import { addDays, getWeekDays, isSameDay, startOfWeek } from "@/app/_lib/date";
-import { useReviews } from "@/app/_lib/use-reviews";
+import {
+  addReview,
+  removeReview,
+  toggleReview,
+  updateReviewEmail,
+} from "@/app/_lib/actions";
 import { WeekNav } from "./week-nav";
 import { DayCard } from "./day-card";
 
-export function ReviewLog() {
-  const [reviews, setReviews] = useReviews();
+export function ReviewLog({ initialReviews }: { initialReviews: Review[] }) {
+  const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [autoFocusId, setAutoFocusId] = useState<string | null>(null);
 
-  function handleAdd(day: Date) {
+  async function handleAdd(day: Date) {
     const now = new Date();
     const createdAt = new Date(
       day.getFullYear(),
@@ -21,13 +26,9 @@ export function ReviewLog() {
       now.getHours(),
       now.getMinutes(),
       now.getSeconds(),
-    );
-    const review: Review = {
-      id: crypto.randomUUID(),
-      email: "",
-      done: false,
-      createdAt: createdAt.toISOString(),
-    };
+    ).toISOString();
+
+    const review = await addReview(createdAt);
     setReviews((prev) => [...prev, review]);
     setAutoFocusId(review.id);
   }
@@ -36,16 +37,19 @@ export function ReviewLog() {
     setReviews((prev) =>
       prev.map((r) => (r.id === id ? { ...r, done: !r.done } : r)),
     );
+    toggleReview(id).catch(console.error);
   }
 
   function handleRemove(id: string) {
     setReviews((prev) => prev.filter((r) => r.id !== id));
+    removeReview(id).catch(console.error);
   }
 
   function handleEmailChange(id: string, email: string) {
     setReviews((prev) =>
       prev.map((r) => (r.id === id ? { ...r, email } : r)),
     );
+    updateReviewEmail(id, email).catch(console.error);
   }
 
   const weekDays = getWeekDays(weekStart);
