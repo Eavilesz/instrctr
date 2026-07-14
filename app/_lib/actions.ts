@@ -1,12 +1,12 @@
 "use server";
 
-import { db } from "./db";
+import { supabase } from "./supabase";
 import type { Review } from "./types";
 
 type ReviewRow = {
   id: string;
   email: string;
-  done: number;
+  done: boolean;
   created_at: string;
   completed_at: string | null;
 };
@@ -15,19 +15,19 @@ function toReview(row: ReviewRow): Review {
   return {
     id: row.id,
     email: row.email,
-    done: row.done === 1,
+    done: row.done,
     createdAt: row.created_at,
     completedAt: row.completed_at,
   };
 }
 
 export async function getReviews(): Promise<Review[]> {
-  const rows = db
-    .prepare(
-      "SELECT id, email, done, created_at, completed_at FROM reviews ORDER BY created_at ASC",
-    )
-    .all() as ReviewRow[];
-  return rows.map(toReview);
+  const { data, error } = await supabase
+    .from("reviews")
+    .select("id, email, done, created_at, completed_at")
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data as ReviewRow[]).map(toReview);
 }
 
 export async function addReview(createdAt: string, email: string): Promise<Review> {
@@ -38,23 +38,42 @@ export async function addReview(createdAt: string, email: string): Promise<Revie
     createdAt,
     completedAt: null,
   };
-  db.prepare(
-    "INSERT INTO reviews (id, email, done, created_at, completed_at) VALUES (?, ?, ?, ?, ?)",
-  ).run(review.id, review.email, 0, review.createdAt, review.completedAt);
+  const { error } = await supabase.from("reviews").insert({
+    id: review.id,
+    email: review.email,
+    done: review.done,
+    created_at: review.createdAt,
+    completed_at: review.completedAt,
+  });
+  if (error) throw error;
   return review;
 }
 
 export async function toggleReview(id: string): Promise<void> {
-  const now = new Date().toISOString();
-  db.prepare(
-    "UPDATE reviews SET done = 1 - done, completed_at = CASE WHEN done = 0 THEN ? ELSE NULL END WHERE id = ?",
-  ).run(now, id);
+  const { data, error: fetchError } = await supabase
+    .from("reviews")
+    .select("done")
+    .eq("id", id)
+    .single();
+  if (fetchError) throw fetchError;
+
+  const done = !(data as { done: boolean }).done;
+  const { error } = await supabase
+    .from("reviews")
+    .update({ done, completed_at: done ? new Date().toISOString() : null })
+    .eq("id", id);
+  if (error) throw error;
 }
 
 export async function removeReview(id: string): Promise<void> {
-  db.prepare("DELETE FROM reviews WHERE id = ?").run(id);
+  const { error } = await supabase.from("reviews").delete().eq("id", id);
+  if (error) throw error;
 }
 
 export async function updateReviewEmail(id: string, email: string): Promise<void> {
-  db.prepare("UPDATE reviews SET email = ? WHERE id = ?").run(email, id);
+  const { error } = await supabase
+    .from("reviews")
+    .update({ email })
+    .eq("id", id);
+  if (error) throw error;
 }
