@@ -13,9 +13,18 @@ function createDatabase(): DatabaseSync {
       id TEXT PRIMARY KEY,
       email TEXT NOT NULL,
       done INTEGER NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL
+      created_at TEXT NOT NULL,
+      completed_at TEXT
     )
   `);
+
+  const columns = database.prepare("PRAGMA table_info(reviews)").all() as {
+    name: string;
+  }[];
+  if (!columns.some((c) => c.name === "completed_at")) {
+    database.exec("ALTER TABLE reviews ADD COLUMN completed_at TEXT");
+  }
+
   return database;
 }
 

@@ -15,9 +15,8 @@ import { DayCard } from "./day-card";
 export function ReviewLog({ initialReviews }: { initialReviews: Review[] }) {
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
-  const [autoFocusId, setAutoFocusId] = useState<string | null>(null);
 
-  async function handleAdd(day: Date) {
+  async function handleAdd(day: Date, email: string) {
     const now = new Date();
     const createdAt = new Date(
       day.getFullYear(),
@@ -28,9 +27,8 @@ export function ReviewLog({ initialReviews }: { initialReviews: Review[] }) {
       now.getSeconds(),
     ).toISOString();
 
-    const review = await addReview(createdAt);
+    const review = await addReview(createdAt, email);
     setReviews((prev) => [...prev, review]);
-    setAutoFocusId(review.id);
   }
 
   function handleToggle(id: string) {
@@ -77,7 +75,6 @@ export function ReviewLog({ initialReviews }: { initialReviews: Review[] }) {
             onToggle={handleToggle}
             onRemove={handleRemove}
             onEmailChange={handleEmailChange}
-            autoFocusId={autoFocusId}
           />
         ))}
       </main>

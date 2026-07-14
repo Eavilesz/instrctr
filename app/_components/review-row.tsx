@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Review } from "@/app/_lib/types";
 import { formatTime } from "@/app/_lib/date";
 
@@ -6,13 +7,11 @@ export function ReviewRow({
   onToggle,
   onRemove,
   onEmailChange,
-  autoFocus,
 }: {
   review: Review;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
   onEmailChange: (id: string, email: string) => void;
-  autoFocus?: boolean;
 }) {
   return (
     <div className="group flex items-center gap-3 border-b border-border-soft px-4 py-2 last:border-b-0 sm:px-5">
@@ -53,14 +52,13 @@ export function ReviewRow({
         value={review.email}
         onChange={(e) => onEmailChange(review.id, e.target.value)}
         placeholder="student@email.com"
-        autoFocus={autoFocus}
         className={`min-w-0 flex-1 truncate border-none bg-transparent font-mono text-[13px] outline-none placeholder:text-ink-faint ${
-          review.done ? "text-ink-soft line-through decoration-border" : "text-foreground"
+          review.done ? "text-ink-soft" : "text-foreground"
         }`}
       />
 
       <span className="w-16 shrink-0 text-right font-mono text-[11.5px] text-ink-faint tabular-nums max-sm:hidden">
-        {formatTime(new Date(review.createdAt))}
+        {review.completedAt ? formatTime(new Date(review.completedAt)) : ""}
       </span>
 
       <button
@@ -71,6 +69,43 @@ export function ReviewRow({
       >
         ×
       </button>
+    </div>
+  );
+}
+
+export function NewReviewRow({ onAdd }: { onAdd: (email: string) => void }) {
+  const [email, setEmail] = useState("");
+
+  function handleSubmit() {
+    const trimmed = email.trim();
+    if (!trimmed) return;
+    onAdd(trimmed);
+    setEmail("");
+  }
+
+  return (
+    <div className="flex items-center gap-3 border-b border-border-soft px-4 py-2 last:border-b-0 sm:px-5">
+      <span
+        className="h-4.5 w-4.5 shrink-0 rounded-[5px] border-[1.5px] border-dashed border-ink-faint"
+        aria-hidden="true"
+      />
+
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleSubmit();
+          }
+        }}
+        placeholder="student@email.com"
+        className="min-w-0 flex-1 truncate border-none bg-transparent font-mono text-[13px] text-foreground outline-none placeholder:text-ink-faint"
+      />
+
+      <span className="w-16 shrink-0 max-sm:hidden" aria-hidden="true" />
+      <span className="w-5 shrink-0" aria-hidden="true" />
     </div>
   );
 }

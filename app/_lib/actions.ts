@@ -8,6 +8,7 @@ type ReviewRow = {
   email: string;
   done: number;
   created_at: string;
+  completed_at: string | null;
 };
 
 function toReview(row: ReviewRow): Review {
@@ -16,29 +17,38 @@ function toReview(row: ReviewRow): Review {
     email: row.email,
     done: row.done === 1,
     createdAt: row.created_at,
+    completedAt: row.completed_at,
   };
 }
 
 export async function getReviews(): Promise<Review[]> {
   const rows = db
-    .prepare("SELECT id, email, done, created_at FROM reviews ORDER BY created_at ASC")
+    .prepare(
+      "SELECT id, email, done, created_at, completed_at FROM reviews ORDER BY created_at ASC",
+    )
     .all() as ReviewRow[];
   return rows.map(toReview);
 }
 
-export async function addReview(createdAt: string): Promise<Review> {
-  const review: Review = { id: crypto.randomUUID(), email: "", done: false, createdAt };
-  db.prepare("INSERT INTO reviews (id, email, done, created_at) VALUES (?, ?, ?, ?)").run(
-    review.id,
-    review.email,
-    0,
-    review.createdAt,
-  );
+export async function addReview(createdAt: string, email: string): Promise<Review> {
+  const review: Review = {
+    id: crypto.randomUUID(),
+    email,
+    done: false,
+    createdAt,
+    completedAt: null,
+  };
+  db.prepare(
+    "INSERT INTO reviews (id, email, done, created_at, completed_at) VALUES (?, ?, ?, ?, ?)",
+  ).run(review.id, review.email, 0, review.createdAt, review.completedAt);
   return review;
 }
 
 export async function toggleReview(id: string): Promise<void> {
-  db.prepare("UPDATE reviews SET done = 1 - done WHERE id = ?").run(id);
+  const now = new Date().toISOString();
+  db.prepare(
+    "UPDATE reviews SET done = 1 - done, completed_at = CASE WHEN done = 0 THEN ? ELSE NULL END WHERE id = ?",
+  ).run(now, id);
 }
 
 export async function removeReview(id: string): Promise<void> {
