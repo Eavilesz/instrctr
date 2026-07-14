@@ -57,8 +57,10 @@ export function ReviewLog({ initialReviews }: { initialReviews: Review[] }) {
     <div className="mx-auto w-full max-w-[760px] px-6 py-10 sm:py-12">
       <WeekNav
         weekStart={weekStart}
-        weekTotal={reviews.filter((r) =>
-          weekDays.some((day) => isSameDay(new Date(r.createdAt), day)),
+        weekTotal={reviews.filter(
+          (r) =>
+            r.done &&
+            weekDays.some((day) => isSameDay(new Date(r.createdAt), day)),
         ).length}
         onPrevWeek={() => setWeekStart((d) => addDays(d, -7))}
         onNextWeek={() => setWeekStart((d) => addDays(d, 7))}

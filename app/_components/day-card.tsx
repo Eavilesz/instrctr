@@ -38,7 +38,9 @@ export function DayCard({
         </div>
 
         <div className="ml-auto flex items-baseline gap-1 font-mono tabular-nums">
-          <span className="text-sm font-semibold">{reviews.length}</span>
+          <span className="text-sm font-semibold">
+            {reviews.filter((r) => r.done).length}
+          </span>
           <span className="text-[11px] text-ink-faint">today</span>
         </div>
       </div>
