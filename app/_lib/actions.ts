@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { supabase } from "./supabase";
 import type { Review } from "./types";
 
@@ -46,6 +47,7 @@ export async function addReview(createdAt: string, email: string): Promise<Revie
     completed_at: review.completedAt,
   });
   if (error) throw error;
+  revalidatePath("/");
   return review;
 }
 
@@ -63,11 +65,13 @@ export async function toggleReview(id: string): Promise<void> {
     .update({ done, completed_at: done ? new Date().toISOString() : null })
     .eq("id", id);
   if (error) throw error;
+  revalidatePath("/");
 }
 
 export async function removeReview(id: string): Promise<void> {
   const { error } = await supabase.from("reviews").delete().eq("id", id);
   if (error) throw error;
+  revalidatePath("/");
 }
 
 export async function updateReviewEmail(id: string, email: string): Promise<void> {
@@ -76,4 +80,5 @@ export async function updateReviewEmail(id: string, email: string): Promise<void
     .update({ email })
     .eq("id", id);
   if (error) throw error;
+  revalidatePath("/");
 }
