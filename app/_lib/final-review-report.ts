@@ -34,6 +34,9 @@ const REPORT_FOOTER = `I left a detailed feedback in the pull request in GitHub.
 
 Good luck!`;
 
+const FAILED_ITEMS_LEGEND =
+  "Below, any unchecked box (`[ ]`) marks an item you still need to address. My notes on how to fix it are listed right under each one as **Feedback**.";
+
 export function generateReport(state: ReviewState, score: number): string {
   const failedItems = RUBRIC.flatMap((section) => section.items).filter(
     (item) => !state[item.id]?.checked,
@@ -45,13 +48,20 @@ export function generateReport(state: ReviewState, score: number): string {
     REPORT_FOOTER,
   ];
 
+  if (failedItems.length > 0) {
+    parts.push(FAILED_ITEMS_LEGEND);
+  }
+
   for (const item of failedItems) {
     const feedbackLines = (state[item.id]?.feedback ?? "")
       .split("\n")
       .map((line) => line.trim())
       .filter(Boolean);
 
-    const lines = [`- [ ] <!--${item.points}--> ${item.text}`, ...feedbackLines.map((line) => `  - ${line}`)];
+    const lines = [`- [ ] <!--${item.points}--> ${item.text}`];
+    if (feedbackLines.length > 0) {
+      lines.push("", "  **Feedback:**", ...feedbackLines.map((line) => `  - ${line}`));
+    }
     parts.push(lines.join("\n"));
   }
 
