@@ -7,7 +7,7 @@ import {
   addReview,
   removeReview,
   toggleReview,
-  updateReviewEmail,
+  updateReviewUsername,
 } from "@/app/_lib/actions";
 import { WeekNav } from "./week-nav";
 import { DayCard } from "./day-card";
@@ -22,7 +22,7 @@ export function ReviewLog({
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
 
-  async function handleAdd(day: Date, email: string) {
+  async function handleAdd(day: Date, username: string) {
     const now = new Date();
     const createdAt = new Date(
       day.getFullYear(),
@@ -33,7 +33,7 @@ export function ReviewLog({
       now.getSeconds(),
     ).toISOString();
 
-    const review = await addReview(createdAt, email);
+    const review = await addReview(createdAt, username);
     setReviews((prev) => [...prev, review]);
   }
 
@@ -49,11 +49,11 @@ export function ReviewLog({
     removeReview(id).catch(console.error);
   }
 
-  function handleEmailChange(id: string, email: string) {
+  function handleUsernameChange(id: string, username: string) {
     setReviews((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, email } : r)),
+      prev.map((r) => (r.id === id ? { ...r, username } : r)),
     );
-    updateReviewEmail(id, email).catch(console.error);
+    updateReviewUsername(id, username).catch(console.error);
   }
 
   const weekDays = getWeekDays(weekStart);
@@ -83,7 +83,7 @@ export function ReviewLog({
               onAdd={handleAdd}
               onToggle={handleToggle}
               onRemove={handleRemove}
-              onEmailChange={handleEmailChange}
+              onUsernameChange={handleUsernameChange}
             />
           ))}
         </main>

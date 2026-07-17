@@ -6,12 +6,12 @@ export function ReviewRow({
   review,
   onToggle,
   onRemove,
-  onEmailChange,
+  onUsernameChange,
 }: {
   review: Review;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
-  onEmailChange: (id: string, email: string) => void;
+  onUsernameChange: (id: string, username: string) => void;
 }) {
   return (
     <div className="group flex items-center gap-3 border-b border-border-soft px-4 py-2 last:border-b-0 sm:px-5">
@@ -48,10 +48,10 @@ export function ReviewRow({
       </button>
 
       <input
-        type="email"
-        value={review.email}
-        onChange={(e) => onEmailChange(review.id, e.target.value)}
-        placeholder="student@email.com"
+        type="text"
+        value={review.username}
+        onChange={(e) => onUsernameChange(review.id, e.target.value)}
+        placeholder="Student name"
         className={`min-w-0 flex-1 truncate border-none bg-transparent font-mono text-[13px] outline-none placeholder:text-ink-faint ${
           review.done ? "text-ink-soft" : "text-foreground"
         }`}
@@ -73,14 +73,14 @@ export function ReviewRow({
   );
 }
 
-export function NewReviewRow({ onAdd }: { onAdd: (email: string) => void }) {
-  const [email, setEmail] = useState("");
+export function NewReviewRow({ onAdd }: { onAdd: (username: string) => void }) {
+  const [username, setUsername] = useState("");
 
   function handleSubmit() {
-    const trimmed = email.trim();
+    const trimmed = username.trim();
     if (!trimmed) return;
     onAdd(trimmed);
-    setEmail("");
+    setUsername("");
   }
 
   return (
@@ -91,16 +91,16 @@ export function NewReviewRow({ onAdd }: { onAdd: (email: string) => void }) {
       />
 
       <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        type="text"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
             handleSubmit();
           }
         }}
-        placeholder="student@email.com"
+        placeholder="Student name"
         className="min-w-0 flex-1 truncate border-none bg-transparent font-mono text-[13px] text-foreground outline-none placeholder:text-ink-faint"
       />
 

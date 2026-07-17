@@ -4,21 +4,21 @@ export type Database = {
       reviews: {
         Row: {
           id: string;
-          email: string;
+          username: string;
           done: boolean;
           created_at: string;
           completed_at: string | null;
         };
         Insert: {
           id: string;
-          email: string;
+          username: string;
           done: boolean;
           created_at: string;
           completed_at?: string | null;
         };
         Update: {
           id?: string;
-          email?: string;
+          username?: string;
           done?: boolean;
           created_at?: string;
           completed_at?: string | null;

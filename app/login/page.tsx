@@ -13,7 +13,7 @@ export default function LoginPage() {
         className="flex w-full max-w-[320px] flex-col gap-4 rounded-lg border border-border bg-surface p-7"
       >
         <span className="font-display text-[21px] font-semibold">
-          Review Log
+          Instrctr
         </span>
 
         <div className="flex flex-col gap-1.5">

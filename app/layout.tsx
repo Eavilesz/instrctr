@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Review Log",
+  title: "Instrctr",
   description: "Track daily student project reviews.",
 };
 

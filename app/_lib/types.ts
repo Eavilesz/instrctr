@@ -1,6 +1,6 @@
 export type Review = {
   id: string;
-  email: string;
+  username: string;
   done: boolean;
   /** ISO timestamp of when the review row was created */
   createdAt: string;

@@ -10,15 +10,15 @@ export function DayCard({
   onAdd,
   onToggle,
   onRemove,
-  onEmailChange,
+  onUsernameChange,
 }: {
   day: Date;
   isToday: boolean;
   reviews: Review[];
-  onAdd: (day: Date, email: string) => void;
+  onAdd: (day: Date, username: string) => void;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
-  onEmailChange: (id: string, email: string) => void;
+  onUsernameChange: (id: string, username: string) => void;
 }) {
   const [open, setOpen] = useState(isToday);
   const dayName = WEEKDAYS[day.getDay()];
@@ -75,10 +75,10 @@ export function DayCard({
               review={review}
               onToggle={onToggle}
               onRemove={onRemove}
-              onEmailChange={onEmailChange}
+              onUsernameChange={onUsernameChange}
             />
           ))}
-          <NewReviewRow onAdd={(email) => onAdd(day, email)} />
+          <NewReviewRow onAdd={(username) => onAdd(day, username)} />
         </div>
       )}
     </section>

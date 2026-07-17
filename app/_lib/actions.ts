@@ -6,7 +6,7 @@ import type { CommentCategory, GeneralComment, Review } from "./types";
 
 type ReviewRow = {
   id: string;
-  email: string;
+  username: string;
   done: boolean;
   created_at: string;
   completed_at: string | null;
@@ -15,7 +15,7 @@ type ReviewRow = {
 function toReview(row: ReviewRow): Review {
   return {
     id: row.id,
-    email: row.email,
+    username: row.username,
     done: row.done,
     createdAt: row.created_at,
     completedAt: row.completed_at,
@@ -25,23 +25,23 @@ function toReview(row: ReviewRow): Review {
 export async function getReviews(): Promise<Review[]> {
   const { data, error } = await supabase
     .from("reviews")
-    .select("id, email, done, created_at, completed_at")
+    .select("id, username, done, created_at, completed_at")
     .order("created_at", { ascending: true });
   if (error) throw error;
   return (data as ReviewRow[]).map(toReview);
 }
 
-export async function addReview(createdAt: string, email: string): Promise<Review> {
+export async function addReview(createdAt: string, username: string): Promise<Review> {
   const review: Review = {
     id: crypto.randomUUID(),
-    email,
+    username,
     done: false,
     createdAt,
     completedAt: null,
   };
   const { error } = await supabase.from("reviews").insert({
     id: review.id,
-    email: review.email,
+    username: review.username,
     done: review.done,
     created_at: review.createdAt,
     completed_at: review.completedAt,
@@ -74,10 +74,10 @@ export async function removeReview(id: string): Promise<void> {
   revalidatePath("/");
 }
 
-export async function updateReviewEmail(id: string, email: string): Promise<void> {
+export async function updateReviewUsername(id: string, username: string): Promise<void> {
   const { error } = await supabase
     .from("reviews")
-    .update({ email })
+    .update({ username })
     .eq("id", id);
   if (error) throw error;
   revalidatePath("/");

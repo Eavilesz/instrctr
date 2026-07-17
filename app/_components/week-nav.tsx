@@ -17,7 +17,7 @@ export function WeekNav({
     <header className="mb-7 flex flex-wrap items-center justify-between gap-5 border-b border-border pb-6">
       <div className="flex items-center gap-2.5">
         <span className="font-display text-[21px] font-semibold">
-          Review Log
+          Instrctr
         </span>
         <ThemeToggle />
       </div>
