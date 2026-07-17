@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { formatMonthLabel, formatWeekRange } from "@/app/_lib/date";
 import { logout } from "@/app/_lib/auth-actions";
 import { ThemeToggle } from "./theme-toggle";
@@ -20,6 +21,12 @@ export function WeekNav({
           Instrctr
         </span>
         <ThemeToggle />
+        <Link
+          href="/final-review"
+          className="rounded-md border border-border px-2 py-1 font-mono text-xs text-ink-soft transition-colors hover:bg-surface-alt hover:text-foreground"
+        >
+          Final Review
+        </Link>
       </div>
 
       <div className="flex items-center gap-3.5">
