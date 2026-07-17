@@ -1,11 +1,11 @@
-import { MAX_SCORE, RUBRIC } from "@/app/_lib/final-review-rubric";
+import { MAX_SCORE, type RubricSection } from "@/app/_lib/final-review-rubric";
 
 export type ItemState = { checked: boolean; feedback: string };
 export type ReviewState = Record<string, ItemState>;
 
-export function createInitialReviewState(): ReviewState {
+export function createInitialReviewState(rubric: RubricSection[]): ReviewState {
   const state: ReviewState = {};
-  for (const section of RUBRIC) {
+  for (const section of rubric) {
     for (const item of section.items) {
       state[item.id] = { checked: true, feedback: "" };
     }
@@ -13,9 +13,9 @@ export function createInitialReviewState(): ReviewState {
   return state;
 }
 
-export function computeScore(state: ReviewState): number {
+export function computeScore(rubric: RubricSection[], state: ReviewState): number {
   let deducted = 0;
-  for (const section of RUBRIC) {
+  for (const section of rubric) {
     for (const item of section.items) {
       if (!state[item.id]?.checked) deducted += item.points;
     }
@@ -37,8 +37,12 @@ Good luck!`;
 const FAILED_ITEMS_LEGEND =
   "Below, any unchecked box (`[ ]`) marks an item you still need to address. My notes on how to fix it are listed right under each one as **Feedback**.";
 
-export function generateReport(state: ReviewState, score: number): string {
-  const failedItems = RUBRIC.flatMap((section) => section.items).filter(
+export function generateReport(
+  rubric: RubricSection[],
+  state: ReviewState,
+  score: number,
+): string {
+  const failedItems = rubric.flatMap((section) => section.items).filter(
     (item) => !state[item.id]?.checked,
   );
 

@@ -20,18 +20,31 @@ export function FinalReviewSection({
       </div>
 
       <div>
-        {section.items.map((item, index) => (
-          <FinalReviewItem
-            key={item.id}
-            item={item}
-            state={reviewState[item.id]}
-            showGroupLabel={
-              index === 0 || section.items[index - 1].groupLabel !== item.groupLabel
-            }
-            onToggle={onToggle}
-            onFeedbackChange={onFeedbackChange}
-          />
-        ))}
+        {section.items.map((item, index) => {
+          const prevItem = section.items[index - 1];
+          const showSubsectionTitle =
+            !!item.subsectionTitle && item.subsectionTitle !== prevItem?.subsectionTitle;
+          const showGroupLabel = index === 0 || prevItem.groupLabel !== item.groupLabel;
+
+          return (
+            <div key={item.id}>
+              {showSubsectionTitle && (
+                <div className="border-b border-border-soft bg-surface-alt/60 px-4 py-1.5 sm:px-5">
+                  <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-ink-faint">
+                    {item.subsectionTitle}
+                  </span>
+                </div>
+              )}
+              <FinalReviewItem
+                item={item}
+                state={reviewState[item.id]}
+                showGroupLabel={showGroupLabel}
+                onToggle={onToggle}
+                onFeedbackChange={onFeedbackChange}
+              />
+            </div>
+          );
+        })}
       </div>
     </section>
   );

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { RUBRIC } from "@/app/_lib/final-review-rubric";
+import { RUBRICS, RUBRIC_LABELS, type RubricKind } from "@/app/_lib/final-review-rubric";
 import {
   computeScore,
   createInitialReviewState,
@@ -10,12 +10,26 @@ import {
 } from "@/app/_lib/final-review-report";
 import { FinalReviewSection } from "./final-review-section";
 
+const RUBRIC_KINDS = Object.keys(RUBRIC_LABELS) as RubricKind[];
+
 export function FinalReview() {
-  const [reviewState, setReviewState] = useState(createInitialReviewState);
+  const [rubricKind, setRubricKind] = useState<RubricKind>("regular");
+  const [reviewState, setReviewState] = useState(() =>
+    createInitialReviewState(RUBRICS[rubricKind]),
+  );
   const [copied, setCopied] = useState(false);
 
-  const score = useMemo(() => computeScore(reviewState), [reviewState]);
-  const report = useMemo(() => generateReport(reviewState, score), [reviewState, score]);
+  const rubric = RUBRICS[rubricKind];
+  const score = useMemo(() => computeScore(rubric, reviewState), [rubric, reviewState]);
+  const report = useMemo(
+    () => generateReport(rubric, reviewState, score),
+    [rubric, reviewState, score],
+  );
+
+  function handleRubricChange(kind: RubricKind) {
+    setRubricKind(kind);
+    setReviewState(createInitialReviewState(RUBRICS[kind]));
+  }
 
   function handleToggle(id: string) {
     setReviewState((prev) => ({
@@ -64,9 +78,26 @@ export function FinalReview() {
         </div>
       </header>
 
+      <div className="mb-6 inline-flex gap-1 rounded-md border border-border p-0.5">
+        {RUBRIC_KINDS.map((kind) => (
+          <button
+            key={kind}
+            type="button"
+            onClick={() => handleRubricChange(kind)}
+            className={`rounded-[5px] px-3 py-1.5 text-xs font-medium transition-colors ${
+              kind === rubricKind
+                ? "bg-accent text-surface"
+                : "text-ink-soft hover:bg-surface-alt hover:text-foreground"
+            }`}
+          >
+            {RUBRIC_LABELS[kind]}
+          </button>
+        ))}
+      </div>
+
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
         <main className="flex flex-col gap-4.5 lg:w-[420px] lg:shrink-0">
-          {RUBRIC.map((section) => (
+          {rubric.map((section) => (
             <FinalReviewSection
               key={section.title}
               section={section}
