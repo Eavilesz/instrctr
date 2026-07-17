@@ -8,9 +8,20 @@ export type Review = {
   completedAt: string | null;
 };
 
+export const COMMENT_CATEGORIES = [
+  "Approval",
+  "Reject",
+  "Improvements",
+  "Comment",
+  "Others",
+] as const;
+
+export type CommentCategory = (typeof COMMENT_CATEGORIES)[number];
+
 export type GeneralComment = {
   id: string;
   content: string;
+  category: CommentCategory;
   createdAt: string;
   updatedAt: string;
 };

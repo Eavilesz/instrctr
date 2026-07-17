@@ -1,15 +1,41 @@
 "use client";
 
 import { useState } from "react";
-import type { GeneralComment } from "@/app/_lib/types";
+import { COMMENT_CATEGORIES, type CommentCategory, type GeneralComment } from "@/app/_lib/types";
+import { CATEGORY_BADGE_CLASSES } from "@/app/_lib/comment-categories";
+
+function CategoryBadgeSelect({
+  category,
+  onChange,
+}: {
+  category: CommentCategory;
+  onChange: (category: CommentCategory) => void;
+}) {
+  return (
+    <select
+      value={category}
+      onChange={(e) => onChange(e.target.value as CommentCategory)}
+      aria-label="Comment category"
+      className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[11px] font-medium outline-none ${CATEGORY_BADGE_CLASSES[category]}`}
+    >
+      {COMMENT_CATEGORIES.map((c) => (
+        <option key={c} value={c}>
+          {c}
+        </option>
+      ))}
+    </select>
+  );
+}
 
 export function CommentRow({
   comment,
   onUpdate,
+  onCategoryChange,
   onRemove,
 }: {
   comment: GeneralComment;
   onUpdate: (id: string, content: string) => void;
+  onCategoryChange: (id: string, category: CommentCategory) => void;
   onRemove: (id: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
@@ -45,6 +71,12 @@ export function CommentRow({
   if (editing) {
     return (
       <div className="border-b border-border-soft px-4 py-3 last:border-b-0 sm:px-5">
+        <div className="mb-2">
+          <CategoryBadgeSelect
+            category={comment.category}
+            onChange={(category) => onCategoryChange(comment.id, category)}
+          />
+        </div>
         <textarea
           autoFocus
           value={draft}
@@ -84,6 +116,11 @@ export function CommentRow({
 
   return (
     <div className="group flex items-start gap-3 border-b border-border-soft px-4 py-3 last:border-b-0 sm:px-5">
+      <CategoryBadgeSelect
+        category={comment.category}
+        onChange={(category) => onCategoryChange(comment.id, category)}
+      />
+
       <p className="min-w-0 flex-1 whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
         {comment.content}
       </p>
@@ -153,38 +190,48 @@ export function CommentRow({
   );
 }
 
-export function NewCommentRow({ onAdd }: { onAdd: (content: string) => void }) {
+export function NewCommentRow({
+  onAdd,
+}: {
+  onAdd: (content: string, category: CommentCategory) => void;
+}) {
   const [content, setContent] = useState("");
+  const [category, setCategory] = useState<CommentCategory>("Others");
 
   function handleSubmit() {
     const trimmed = content.trim();
     if (!trimmed) return;
-    onAdd(trimmed);
+    onAdd(trimmed, category);
     setContent("");
+    setCategory("Others");
   }
 
   return (
-    <div className="flex items-start gap-3 px-4 py-3 sm:px-5">
-      <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-            e.preventDefault();
-            handleSubmit();
-          }
-        }}
-        placeholder="Add a new general comment… (⌘/Ctrl + Enter to save)"
-        rows={3}
-        className="min-w-0 flex-1 resize-y rounded-md border border-dashed border-ink-faint bg-transparent px-2.5 py-2 font-sans text-sm text-foreground outline-none placeholder:text-ink-faint focus:border-solid focus:border-accent"
-      />
-      <button
-        type="button"
-        onClick={handleSubmit}
-        className="mt-0.5 shrink-0 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-ink-soft transition-colors hover:bg-surface-alt hover:text-foreground"
-      >
-        Add
-      </button>
+    <div className="flex flex-col gap-2 px-4 py-3 sm:px-5">
+      <CategoryBadgeSelect category={category} onChange={setCategory} />
+
+      <div className="flex items-start gap-3">
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+              e.preventDefault();
+              handleSubmit();
+            }
+          }}
+          placeholder="Add a new general comment… (⌘/Ctrl + Enter to save)"
+          rows={3}
+          className="min-w-0 flex-1 resize-y rounded-md border border-dashed border-ink-faint bg-transparent px-2.5 py-2 font-sans text-sm text-foreground outline-none placeholder:text-ink-faint focus:border-solid focus:border-accent"
+        />
+        <button
+          type="button"
+          onClick={handleSubmit}
+          className="mt-0.5 shrink-0 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-ink-soft transition-colors hover:bg-surface-alt hover:text-foreground"
+        >
+          Add
+        </button>
+      </div>
     </div>
   );
 }

@@ -29,18 +29,21 @@ export type Database = {
         Row: {
           id: string;
           content: string;
+          category: string;
           created_at: string;
           updated_at: string;
         };
         Insert: {
           id: string;
           content: string;
+          category?: string;
           created_at?: string;
           updated_at?: string;
         };
         Update: {
           id?: string;
           content?: string;
+          category?: string;
           created_at?: string;
           updated_at?: string;
         };

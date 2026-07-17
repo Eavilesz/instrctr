@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { supabase } from "./supabase";
-import type { GeneralComment, Review } from "./types";
+import type { CommentCategory, GeneralComment, Review } from "./types";
 
 type ReviewRow = {
   id: string;
@@ -86,6 +86,7 @@ export async function updateReviewEmail(id: string, email: string): Promise<void
 type GeneralCommentRow = {
   id: string;
   content: string;
+  category: string;
   created_at: string;
   updated_at: string;
 };
@@ -94,6 +95,7 @@ function toGeneralComment(row: GeneralCommentRow): GeneralComment {
   return {
     id: row.id,
     content: row.content,
+    category: row.category as CommentCategory,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -102,23 +104,28 @@ function toGeneralComment(row: GeneralCommentRow): GeneralComment {
 export async function getGeneralComments(): Promise<GeneralComment[]> {
   const { data, error } = await supabase
     .from("general_comments")
-    .select("id, content, created_at, updated_at")
+    .select("id, content, category, created_at, updated_at")
     .order("created_at", { ascending: true });
   if (error) throw error;
   return (data as GeneralCommentRow[]).map(toGeneralComment);
 }
 
-export async function addGeneralComment(content: string): Promise<GeneralComment> {
+export async function addGeneralComment(
+  content: string,
+  category: CommentCategory,
+): Promise<GeneralComment> {
   const now = new Date().toISOString();
   const comment: GeneralComment = {
     id: crypto.randomUUID(),
     content,
+    category,
     createdAt: now,
     updatedAt: now,
   };
   const { error } = await supabase.from("general_comments").insert({
     id: comment.id,
     content: comment.content,
+    category: comment.category,
     created_at: comment.createdAt,
     updated_at: comment.updatedAt,
   });
@@ -131,6 +138,18 @@ export async function updateGeneralComment(id: string, content: string): Promise
   const { error } = await supabase
     .from("general_comments")
     .update({ content, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw error;
+  revalidatePath("/");
+}
+
+export async function updateGeneralCommentCategory(
+  id: string,
+  category: CommentCategory,
+): Promise<void> {
+  const { error } = await supabase
+    .from("general_comments")
+    .update({ category, updated_at: new Date().toISOString() })
     .eq("id", id);
   if (error) throw error;
   revalidatePath("/");
