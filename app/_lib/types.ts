@@ -7,3 +7,10 @@ export type Review = {
   /** ISO timestamp of when the review was marked done, if it has been */
   completedAt: string | null;
 };
+
+export type GeneralComment = {
+  id: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+};

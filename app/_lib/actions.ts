@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { supabase } from "./supabase";
-import type { Review } from "./types";
+import type { GeneralComment, Review } from "./types";
 
 type ReviewRow = {
   id: string;
@@ -79,6 +79,65 @@ export async function updateReviewEmail(id: string, email: string): Promise<void
     .from("reviews")
     .update({ email })
     .eq("id", id);
+  if (error) throw error;
+  revalidatePath("/");
+}
+
+type GeneralCommentRow = {
+  id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+};
+
+function toGeneralComment(row: GeneralCommentRow): GeneralComment {
+  return {
+    id: row.id,
+    content: row.content,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export async function getGeneralComments(): Promise<GeneralComment[]> {
+  const { data, error } = await supabase
+    .from("general_comments")
+    .select("id, content, created_at, updated_at")
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data as GeneralCommentRow[]).map(toGeneralComment);
+}
+
+export async function addGeneralComment(content: string): Promise<GeneralComment> {
+  const now = new Date().toISOString();
+  const comment: GeneralComment = {
+    id: crypto.randomUUID(),
+    content,
+    createdAt: now,
+    updatedAt: now,
+  };
+  const { error } = await supabase.from("general_comments").insert({
+    id: comment.id,
+    content: comment.content,
+    created_at: comment.createdAt,
+    updated_at: comment.updatedAt,
+  });
+  if (error) throw error;
+  revalidatePath("/");
+  return comment;
+}
+
+export async function updateGeneralComment(id: string, content: string): Promise<void> {
+  const { error } = await supabase
+    .from("general_comments")
+    .update({ content, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw error;
+  revalidatePath("/");
+}
+
+export async function removeGeneralComment(id: string): Promise<void> {
+  const { error } = await supabase.from("general_comments").delete().eq("id", id);
   if (error) throw error;
   revalidatePath("/");
 }

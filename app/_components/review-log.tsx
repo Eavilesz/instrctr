@@ -12,7 +12,13 @@ import {
 import { WeekNav } from "./week-nav";
 import { DayCard } from "./day-card";
 
-export function ReviewLog({ initialReviews }: { initialReviews: Review[] }) {
+export function ReviewLog({
+  initialReviews,
+  sidePanel,
+}: {
+  initialReviews: Review[];
+  sidePanel?: React.ReactNode;
+}) {
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
 
@@ -54,7 +60,7 @@ export function ReviewLog({ initialReviews }: { initialReviews: Review[] }) {
   const today = new Date();
 
   return (
-    <div className="mx-auto w-full max-w-[760px] px-6 py-10 sm:py-12">
+    <>
       <WeekNav
         weekStart={weekStart}
         weekTotal={reviews.filter(
@@ -66,20 +72,23 @@ export function ReviewLog({ initialReviews }: { initialReviews: Review[] }) {
         onNextWeek={() => setWeekStart((d) => addDays(d, 7))}
       />
 
-      <main className="flex flex-col gap-[18px]">
-        {weekDays.map((day) => (
-          <DayCard
-            key={day.toISOString()}
-            day={day}
-            isToday={isSameDay(day, today)}
-            reviews={reviews.filter((r) => isSameDay(new Date(r.createdAt), day))}
-            onAdd={handleAdd}
-            onToggle={handleToggle}
-            onRemove={handleRemove}
-            onEmailChange={handleEmailChange}
-          />
-        ))}
-      </main>
-    </div>
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        <main className="flex flex-col gap-4.5 lg:w-85 lg:shrink-0">
+          {weekDays.map((day) => (
+            <DayCard
+              key={day.toISOString()}
+              day={day}
+              isToday={isSameDay(day, today)}
+              reviews={reviews.filter((r) => isSameDay(new Date(r.createdAt), day))}
+              onAdd={handleAdd}
+              onToggle={handleToggle}
+              onRemove={handleRemove}
+              onEmailChange={handleEmailChange}
+            />
+          ))}
+        </main>
+        {sidePanel && <div className="min-w-0 flex-1">{sidePanel}</div>}
+      </div>
+    </>
   );
 }
