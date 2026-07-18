@@ -1,47 +1,100 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { RUBRICS, RUBRIC_LABELS, type RubricKind } from "@/app/_lib/final-review-rubric";
+import { RUBRICS, RUBRIC_KINDS, RUBRIC_LABELS, type RubricKind } from "@/app/_lib/final-review-rubric";
 import {
   computeScore,
   createInitialReviewState,
   generateReport,
 } from "@/app/_lib/final-review-report";
+import {
+  saveReview,
+  useStoredReview,
+  type ReviewStatesByKind,
+} from "@/app/_lib/final-review-storage";
 import { FinalReviewSection } from "./final-review-section";
 
-const RUBRIC_KINDS = Object.keys(RUBRIC_LABELS) as RubricKind[];
+function createInitialReviewStates(): ReviewStatesByKind {
+  return {
+    regular: createInitialReviewState(RUBRICS.regular),
+    custom: createInitialReviewState(RUBRICS.custom),
+  };
+}
 
 export function FinalReview() {
-  const [rubricKind, setRubricKind] = useState<RubricKind>("regular");
-  const [reviewState, setReviewState] = useState(() =>
-    createInitialReviewState(RUBRICS[rubricKind]),
+  // Reading localStorage can only resolve after the client mounts, so this key
+  // forces a fresh mount of FinalReviewContent once any saved review is found —
+  // avoiding the SSR hydration mismatch a manual useEffect + setState would cause.
+  const stored = useStoredReview();
+  return (
+    <FinalReviewContent
+      key={stored ? "restored" : "fresh"}
+      initialRubricKind={stored?.rubricKind ?? "regular"}
+      initialReviewStates={stored?.reviewStates}
+    />
+  );
+}
+
+function FinalReviewContent({
+  initialRubricKind,
+  initialReviewStates,
+}: {
+  initialRubricKind: RubricKind;
+  initialReviewStates?: ReviewStatesByKind;
+}) {
+  const [rubricKind, setRubricKind] = useState(initialRubricKind);
+  const [reviewStates, setReviewStates] = useState(
+    () => initialReviewStates ?? createInitialReviewStates(),
   );
   const [copied, setCopied] = useState(false);
 
   const rubric = RUBRICS[rubricKind];
+  const reviewState = reviewStates[rubricKind];
   const score = useMemo(() => computeScore(rubric, reviewState), [rubric, reviewState]);
   const report = useMemo(
     () => generateReport(rubric, reviewState, score),
     [rubric, reviewState, score],
   );
 
-  function handleRubricChange(kind: RubricKind) {
-    setRubricKind(kind);
-    setReviewState(createInitialReviewState(RUBRICS[kind]));
-  }
+  // Skip the first run so this never re-saves stale/default state over what was just restored.
+  const skipNextSave = useRef(true);
+  useEffect(() => {
+    if (skipNextSave.current) {
+      skipNextSave.current = false;
+      return;
+    }
+    saveReview(rubricKind, reviewStates);
+  }, [rubricKind, reviewStates]);
 
   function handleToggle(id: string) {
-    setReviewState((prev) => ({
+    setReviewStates((prev) => ({
       ...prev,
-      [id]: { ...prev[id], checked: !prev[id].checked },
+      [rubricKind]: {
+        ...prev[rubricKind],
+        [id]: { ...prev[rubricKind][id], checked: !prev[rubricKind][id].checked },
+      },
     }));
   }
 
   function handleFeedbackChange(id: string, feedback: string) {
-    setReviewState((prev) => ({
+    setReviewStates((prev) => ({
       ...prev,
-      [id]: { ...prev[id], feedback },
+      [rubricKind]: {
+        ...prev[rubricKind],
+        [id]: { ...prev[rubricKind][id], feedback },
+      },
+    }));
+  }
+
+  function handleReset() {
+    const confirmed = window.confirm(
+      `Reset the ${RUBRIC_LABELS[rubricKind]} checklist? This clears every checked box and comment you've entered for it.`,
+    );
+    if (!confirmed) return;
+    setReviewStates((prev) => ({
+      ...prev,
+      [rubricKind]: createInitialReviewState(rubric),
     }));
   }
 
@@ -78,21 +131,31 @@ export function FinalReview() {
         </div>
       </header>
 
-      <div className="mb-6 inline-flex gap-1 rounded-md border border-border p-0.5">
-        {RUBRIC_KINDS.map((kind) => (
-          <button
-            key={kind}
-            type="button"
-            onClick={() => handleRubricChange(kind)}
-            className={`rounded-[5px] px-3 py-1.5 text-xs font-medium transition-colors ${
-              kind === rubricKind
-                ? "bg-accent text-surface"
-                : "text-ink-soft hover:bg-surface-alt hover:text-foreground"
-            }`}
-          >
-            {RUBRIC_LABELS[kind]}
-          </button>
-        ))}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="inline-flex gap-1 rounded-md border border-border p-0.5">
+          {RUBRIC_KINDS.map((kind) => (
+            <button
+              key={kind}
+              type="button"
+              onClick={() => setRubricKind(kind)}
+              className={`rounded-[5px] px-3 py-1.5 text-xs font-medium transition-colors ${
+                kind === rubricKind
+                  ? "bg-accent text-surface"
+                  : "text-ink-soft hover:bg-surface-alt hover:text-foreground"
+              }`}
+            >
+              {RUBRIC_LABELS[kind]}
+            </button>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={handleReset}
+          className="rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-ink-soft transition-colors hover:border-danger hover:text-danger"
+        >
+          Reset {RUBRIC_LABELS[rubricKind]}
+        </button>
       </div>
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">

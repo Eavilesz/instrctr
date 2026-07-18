@@ -17,6 +17,8 @@ export type RubricSection = {
 
 export type RubricKind = "regular" | "custom";
 
+export const RUBRIC_KINDS: RubricKind[] = ["regular", "custom"];
+
 export const RUBRIC_LABELS: Record<RubricKind, string> = {
   regular: "Regular Final Project",
   custom: "Custom Final Project",
