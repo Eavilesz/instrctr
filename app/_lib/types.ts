@@ -8,6 +8,16 @@ export type Review = {
   completedAt: string | null;
 };
 
+export type HubResponse = {
+  id: string;
+  username: string;
+  checked: boolean;
+  /** ISO timestamp of when the response row was created */
+  createdAt: string;
+  /** ISO timestamp of when the response was marked checked, if it has been */
+  completedAt: string | null;
+};
+
 export const COMMENT_CATEGORIES = [
   "Approval",
   "Reject",

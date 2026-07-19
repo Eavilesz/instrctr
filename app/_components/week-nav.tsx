@@ -6,11 +6,13 @@ import { ThemeToggle } from "./theme-toggle";
 export function WeekNav({
   weekStart,
   weekTotal,
+  hubWeekTotal,
   onPrevWeek,
   onNextWeek,
 }: {
   weekStart: Date;
   weekTotal: number;
+  hubWeekTotal: number;
   onPrevWeek: () => void;
   onNextWeek: () => void;
 }) {
@@ -63,6 +65,14 @@ export function WeekNav({
           </span>
           <span className="block text-[11px] text-ink-soft">
             reviews this week
+          </span>
+        </div>
+        <div className="text-right leading-tight">
+          <span className="font-mono text-[22px] font-semibold text-accent tabular-nums">
+            {hubWeekTotal}
+          </span>
+          <span className="block text-[11px] text-ink-soft">
+            HUB checked
           </span>
         </div>
         <form action={logout}>

@@ -1,25 +1,33 @@
 "use client";
 
 import { useState } from "react";
-import type { Review } from "@/app/_lib/types";
+import type { HubResponse, Review } from "@/app/_lib/types";
 import { addDays, getWeekDays, isSameDay, startOfWeek } from "@/app/_lib/date";
 import {
+  addHubResponse,
   addReview,
+  removeHubResponse,
   removeReview,
+  toggleHubResponse,
   toggleReview,
+  updateHubResponseUsername,
   updateReviewUsername,
 } from "@/app/_lib/actions";
 import { WeekNav } from "./week-nav";
 import { DayCard } from "./day-card";
+import { HubDayCard } from "./hub-day-card";
 
 export function ReviewLog({
   initialReviews,
+  initialHubResponses,
   sidePanel,
 }: {
   initialReviews: Review[];
+  initialHubResponses: HubResponse[];
   sidePanel?: React.ReactNode;
 }) {
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
+  const [hubResponses, setHubResponses] = useState<HubResponse[]>(initialHubResponses);
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
 
   async function handleAdd(day: Date, username: string) {
@@ -56,6 +64,40 @@ export function ReviewLog({
     updateReviewUsername(id, username).catch(console.error);
   }
 
+  async function handleHubAdd(day: Date, username: string) {
+    const now = new Date();
+    const createdAt = new Date(
+      day.getFullYear(),
+      day.getMonth(),
+      day.getDate(),
+      now.getHours(),
+      now.getMinutes(),
+      now.getSeconds(),
+    ).toISOString();
+
+    const hubResponse = await addHubResponse(createdAt, username);
+    setHubResponses((prev) => [...prev, hubResponse]);
+  }
+
+  function handleHubToggle(id: string) {
+    setHubResponses((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, checked: !r.checked } : r)),
+    );
+    toggleHubResponse(id).catch(console.error);
+  }
+
+  function handleHubRemove(id: string) {
+    setHubResponses((prev) => prev.filter((r) => r.id !== id));
+    removeHubResponse(id).catch(console.error);
+  }
+
+  function handleHubUsernameChange(id: string, username: string) {
+    setHubResponses((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, username } : r)),
+    );
+    updateHubResponseUsername(id, username).catch(console.error);
+  }
+
   const weekDays = getWeekDays(weekStart);
   const today = new Date();
 
@@ -68,25 +110,50 @@ export function ReviewLog({
             r.done &&
             weekDays.some((day) => isSameDay(new Date(r.createdAt), day)),
         ).length}
+        hubWeekTotal={hubResponses.filter(
+          (r) =>
+            r.checked &&
+            weekDays.some((day) => isSameDay(new Date(r.createdAt), day)),
+        ).length}
         onPrevWeek={() => setWeekStart((d) => addDays(d, -7))}
         onNextWeek={() => setWeekStart((d) => addDays(d, 7))}
       />
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-        <main className="flex flex-col gap-4.5 lg:w-85 lg:shrink-0">
-          {weekDays.map((day) => (
-            <DayCard
-              key={day.toISOString()}
-              day={day}
-              isToday={isSameDay(day, today)}
-              reviews={reviews.filter((r) => isSameDay(new Date(r.createdAt), day))}
-              onAdd={handleAdd}
-              onToggle={handleToggle}
-              onRemove={handleRemove}
-              onUsernameChange={handleUsernameChange}
-            />
-          ))}
-        </main>
+        <div className="flex flex-col gap-8 lg:w-85 lg:shrink-0">
+          <main className="flex flex-col gap-4.5">
+            {weekDays.map((day) => (
+              <DayCard
+                key={day.toISOString()}
+                day={day}
+                isToday={isSameDay(day, today)}
+                reviews={reviews.filter((r) => isSameDay(new Date(r.createdAt), day))}
+                onAdd={handleAdd}
+                onToggle={handleToggle}
+                onRemove={handleRemove}
+                onUsernameChange={handleUsernameChange}
+              />
+            ))}
+          </main>
+
+          <div className="flex flex-col gap-4.5 border-t border-border pt-6">
+            <span className="font-display text-[15px] font-semibold">
+              HUB Responses
+            </span>
+            {weekDays.map((day) => (
+              <HubDayCard
+                key={day.toISOString()}
+                day={day}
+                isToday={isSameDay(day, today)}
+                hubResponses={hubResponses.filter((r) => isSameDay(new Date(r.createdAt), day))}
+                onAdd={handleHubAdd}
+                onToggle={handleHubToggle}
+                onRemove={handleHubRemove}
+                onUsernameChange={handleHubUsernameChange}
+              />
+            ))}
+          </div>
+        </div>
         {sidePanel && <div className="min-w-0 flex-1">{sidePanel}</div>}
       </div>
     </>

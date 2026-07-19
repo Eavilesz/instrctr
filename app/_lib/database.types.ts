@@ -25,6 +25,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      hub_responses: {
+        Row: {
+          id: string;
+          username: string;
+          checked: boolean;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id: string;
+          username: string;
+          checked: boolean;
+          created_at: string;
+          completed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          username?: string;
+          checked?: boolean;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Relationships: [];
+      };
       general_comments: {
         Row: {
           id: string;

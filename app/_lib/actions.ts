@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { supabase } from "./supabase";
-import type { CommentCategory, GeneralComment, Review } from "./types";
+import type { CommentCategory, GeneralComment, HubResponse, Review } from "./types";
 
 type ReviewRow = {
   id: string;
@@ -77,6 +77,91 @@ export async function removeReview(id: string): Promise<void> {
 export async function updateReviewUsername(id: string, username: string): Promise<void> {
   const { error } = await supabase
     .from("reviews")
+    .update({ username })
+    .eq("id", id);
+  if (error) throw error;
+  revalidatePath("/");
+}
+
+type HubResponseRow = {
+  id: string;
+  username: string;
+  checked: boolean;
+  created_at: string;
+  completed_at: string | null;
+};
+
+function toHubResponse(row: HubResponseRow): HubResponse {
+  return {
+    id: row.id,
+    username: row.username,
+    checked: row.checked,
+    createdAt: row.created_at,
+    completedAt: row.completed_at,
+  };
+}
+
+export async function getHubResponses(): Promise<HubResponse[]> {
+  const { data, error } = await supabase
+    .from("hub_responses")
+    .select("id, username, checked, created_at, completed_at")
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data as HubResponseRow[]).map(toHubResponse);
+}
+
+export async function addHubResponse(
+  createdAt: string,
+  username: string,
+): Promise<HubResponse> {
+  const hubResponse: HubResponse = {
+    id: crypto.randomUUID(),
+    username,
+    checked: false,
+    createdAt,
+    completedAt: null,
+  };
+  const { error } = await supabase.from("hub_responses").insert({
+    id: hubResponse.id,
+    username: hubResponse.username,
+    checked: hubResponse.checked,
+    created_at: hubResponse.createdAt,
+    completed_at: hubResponse.completedAt,
+  });
+  if (error) throw error;
+  revalidatePath("/");
+  return hubResponse;
+}
+
+export async function toggleHubResponse(id: string): Promise<void> {
+  const { data, error: fetchError } = await supabase
+    .from("hub_responses")
+    .select("checked")
+    .eq("id", id)
+    .single();
+  if (fetchError) throw fetchError;
+
+  const checked = !(data as { checked: boolean }).checked;
+  const { error } = await supabase
+    .from("hub_responses")
+    .update({ checked, completed_at: checked ? new Date().toISOString() : null })
+    .eq("id", id);
+  if (error) throw error;
+  revalidatePath("/");
+}
+
+export async function removeHubResponse(id: string): Promise<void> {
+  const { error } = await supabase.from("hub_responses").delete().eq("id", id);
+  if (error) throw error;
+  revalidatePath("/");
+}
+
+export async function updateHubResponseUsername(
+  id: string,
+  username: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("hub_responses")
     .update({ username })
     .eq("id", id);
   if (error) throw error;
