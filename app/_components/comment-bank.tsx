@@ -20,7 +20,10 @@ export function CommentBank({
   const [comments, setComments] = useState<GeneralComment[]>(initialComments);
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -57,11 +60,46 @@ export function CommentBank({
     removeGeneralComment(id).catch(console.error);
   }
 
+  function handleCopy(id: string) {
+    const comment = comments.find((c) => c.id === id);
+    if (!comment) return;
+    navigator.clipboard
+      .writeText(comment.content)
+      .then(() => {
+        setCopiedId(comment.id);
+        if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current);
+        copiedTimeoutRef.current = setTimeout(() => setCopiedId(null), 1500);
+      })
+      .catch(console.error);
+  }
+
   const filtered = comments.filter(
     (c) =>
       c.content.toLowerCase().includes(query.trim().toLowerCase()) &&
       (categoryFilter === "all" || c.category === categoryFilter),
   );
+
+  useEffect(() => {
+    setSelectedIndex(-1);
+  }, [query, categoryFilter]);
+
+  function handleSearchKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (filtered.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((i) => Math.min(i + 1, filtered.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter") {
+      const selected = filtered[selectedIndex];
+      if (selected) {
+        e.preventDefault();
+        handleCopy(selected.id);
+      }
+    }
+  }
 
   return (
     <section className="overflow-hidden rounded-[10px] border border-border bg-surface shadow-[0_1px_2px_rgba(36,38,31,0.04),0_4px_14px_rgba(36,38,31,0.05)] dark:shadow-[0_1px_2px_rgba(0,0,0,0.3),0_8px_20px_rgba(0,0,0,0.25)]">
@@ -97,6 +135,7 @@ export function CommentBank({
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
               placeholder="Search comments…"
               className={`w-full rounded-md border border-border bg-surface py-1.5 pl-8 font-sans text-[13px] text-foreground outline-none placeholder:text-ink-faint focus:border-accent ${
                 query ? "pr-7" : "pr-2.5"
@@ -135,11 +174,14 @@ export function CommentBank({
               : "No comments match your search or filter."}
           </p>
         ) : (
-          filtered.map((comment) => (
+          filtered.map((comment, index) => (
             <CommentRow
               key={comment.id}
               comment={comment}
               highlightQuery={query}
+              isSelected={index === selectedIndex}
+              copied={copiedId === comment.id}
+              onCopy={handleCopy}
               onUpdate={handleUpdate}
               onCategoryChange={handleCategoryChange}
               onRemove={handleRemove}

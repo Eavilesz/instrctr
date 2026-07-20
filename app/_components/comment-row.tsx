@@ -48,29 +48,24 @@ function CategoryBadgeSelect({
 export function CommentRow({
   comment,
   highlightQuery = "",
+  isSelected = false,
+  copied = false,
+  onCopy,
   onUpdate,
   onCategoryChange,
   onRemove,
 }: {
   comment: GeneralComment;
   highlightQuery?: string;
+  isSelected?: boolean;
+  copied?: boolean;
+  onCopy: (id: string) => void;
   onUpdate: (id: string, content: string) => void;
   onCategoryChange: (id: string, category: CommentCategory) => void;
   onRemove: (id: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(comment.content);
-  const [copied, setCopied] = useState(false);
-
-  function handleCopy() {
-    navigator.clipboard
-      .writeText(comment.content)
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      })
-      .catch(console.error);
-  }
 
   function handleSave() {
     const trimmed = draft.trim();
@@ -135,7 +130,11 @@ export function CommentRow({
   }
 
   return (
-    <div className="group flex items-start gap-3 border-b border-border-soft px-4 py-3 last:border-b-0 sm:px-5">
+    <div
+      className={`group flex items-start gap-3 border-b border-border-soft px-4 py-3 transition-colors last:border-b-0 sm:px-5 ${
+        isSelected ? "bg-accent/5" : ""
+      }`}
+    >
       <CategoryBadgeSelect
         category={comment.category}
         onChange={(category) => onCategoryChange(comment.id, category)}
@@ -150,7 +149,7 @@ export function CommentRow({
           type="button"
           aria-label="Copy comment"
           title={copied ? "Copied!" : "Copy"}
-          onClick={handleCopy}
+          onClick={() => onCopy(comment.id)}
           className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors ${
             copied
               ? "border-success/40 bg-success/10 text-success"
