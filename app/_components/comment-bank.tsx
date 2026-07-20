@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { COMMENT_CATEGORIES, type CommentCategory, type GeneralComment } from "@/app/_lib/types";
 import {
   addGeneralComment,
@@ -21,6 +21,17 @@ export function CommentBank({
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== "f") return;
+
+      e.preventDefault();
+      searchInputRef.current?.focus();
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   async function handleAdd(content: string, category: CommentCategory) {
     const comment = await addGeneralComment(content, category);
@@ -128,6 +139,7 @@ export function CommentBank({
             <CommentRow
               key={comment.id}
               comment={comment}
+              highlightQuery={query}
               onUpdate={handleUpdate}
               onCategoryChange={handleCategoryChange}
               onRemove={handleRemove}

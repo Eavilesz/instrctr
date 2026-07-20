@@ -4,6 +4,24 @@ import { useState } from "react";
 import { COMMENT_CATEGORIES, type CommentCategory, type GeneralComment } from "@/app/_lib/types";
 import { CATEGORY_BADGE_CLASSES } from "@/app/_lib/comment-categories";
 
+function highlightMatches(text: string, query: string) {
+  const trimmed = query.trim();
+  if (!trimmed) return text;
+
+  const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = text.split(new RegExp(`(${escaped})`, "gi"));
+
+  return parts.map((part, i) =>
+    i % 2 === 1 ? (
+      <mark key={i} className="rounded-sm bg-accent/30 text-foreground">
+        {part}
+      </mark>
+    ) : (
+      part
+    ),
+  );
+}
+
 function CategoryBadgeSelect({
   category,
   onChange,
@@ -29,11 +47,13 @@ function CategoryBadgeSelect({
 
 export function CommentRow({
   comment,
+  highlightQuery = "",
   onUpdate,
   onCategoryChange,
   onRemove,
 }: {
   comment: GeneralComment;
+  highlightQuery?: string;
   onUpdate: (id: string, content: string) => void;
   onCategoryChange: (id: string, category: CommentCategory) => void;
   onRemove: (id: string) => void;
@@ -122,7 +142,7 @@ export function CommentRow({
       />
 
       <p className="min-w-0 flex-1 whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
-        {comment.content}
+        {highlightMatches(comment.content, highlightQuery)}
       </p>
 
       <div className="flex shrink-0 items-center gap-1">
