@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { COMMENT_CATEGORIES, type CommentCategory, type GeneralComment } from "@/app/_lib/types";
 import {
   addGeneralComment,
@@ -20,6 +20,7 @@ export function CommentBank({
   const [comments, setComments] = useState<GeneralComment[]>(initialComments);
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   async function handleAdd(content: string, category: CommentCategory) {
     const comment = await addGeneralComment(content, category);
@@ -81,6 +82,7 @@ export function CommentBank({
               <path d="M16 16l-3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             <input
+              ref={searchInputRef}
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -94,7 +96,10 @@ export function CommentBank({
                 type="button"
                 aria-label="Clear search"
                 title="Clear search"
-                onClick={() => setQuery("")}
+                onClick={() => {
+                  setQuery("");
+                  searchInputRef.current?.focus();
+                }}
                 className="absolute right-1.5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-ink-faint transition-colors hover:bg-surface-alt hover:text-foreground"
               >
                 <svg viewBox="0 0 20 20" className="h-3 w-3" fill="none" aria-hidden="true">
