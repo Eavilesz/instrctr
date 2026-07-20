@@ -145,6 +145,11 @@ export function CommentRow({
       </p>
 
       <div className="flex shrink-0 items-center gap-1">
+        <div
+          className={`flex items-center gap-1 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 ${
+            copied ? "opacity-100" : "opacity-0"
+          }`}
+        >
         <button
           type="button"
           aria-label="Copy comment"
@@ -178,6 +183,7 @@ export function CommentRow({
             </svg>
           )}
         </button>
+        </div>
 
         <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
         <button
