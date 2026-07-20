@@ -125,14 +125,16 @@ export function CommentRow({
         {comment.content}
       </p>
 
-      <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+      <div className="flex shrink-0 items-center gap-1">
         <button
           type="button"
           aria-label="Copy comment"
           title={copied ? "Copied!" : "Copy"}
           onClick={handleCopy}
-          className={`flex h-7 w-7 items-center justify-center rounded-md border border-border transition-colors hover:bg-surface-alt hover:text-foreground ${
-            copied ? "text-success" : "text-ink-faint"
+          className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors ${
+            copied
+              ? "border-success/40 bg-success/10 text-success"
+              : "border-accent/30 bg-accent/10 text-accent hover:border-accent hover:bg-accent/20"
           }`}
         >
           {copied ? (
@@ -158,6 +160,7 @@ export function CommentRow({
           )}
         </button>
 
+        <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
         <button
           type="button"
           aria-label="Edit comment"
@@ -185,6 +188,7 @@ export function CommentRow({
         >
           ×
         </button>
+        </div>
       </div>
     </div>
   );
