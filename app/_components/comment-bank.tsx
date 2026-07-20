@@ -85,8 +85,28 @@ export function CommentBank({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search comments…"
-              className="w-full rounded-md border border-border bg-surface py-1.5 pl-8 pr-2.5 font-sans text-[13px] text-foreground outline-none placeholder:text-ink-faint focus:border-accent"
+              className={`w-full rounded-md border border-border bg-surface py-1.5 pl-8 font-sans text-[13px] text-foreground outline-none placeholder:text-ink-faint focus:border-accent ${
+                query ? "pr-7" : "pr-2.5"
+              }`}
             />
+            {query && (
+              <button
+                type="button"
+                aria-label="Clear search"
+                title="Clear search"
+                onClick={() => setQuery("")}
+                className="absolute right-1.5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-ink-faint transition-colors hover:bg-surface-alt hover:text-foreground"
+              >
+                <svg viewBox="0 0 20 20" className="h-3 w-3" fill="none" aria-hidden="true">
+                  <path
+                    d="M5 5l10 10M15 5L5 15"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
       </div>
