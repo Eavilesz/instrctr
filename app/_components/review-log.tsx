@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { HubResponse, Review } from "@/app/_lib/types";
 import { addDays, getWeekDays, isSameDay, startOfWeek } from "@/app/_lib/date";
 import {
@@ -14,7 +14,7 @@ import {
   updateReviewUsername,
 } from "@/app/_lib/actions";
 import { WeekNav } from "./week-nav";
-import { DayCard } from "./day-card";
+import { DayCard, type DayCardHandle } from "./day-card";
 import { HubDayCard } from "./hub-day-card";
 
 export function ReviewLog({
@@ -29,6 +29,18 @@ export function ReviewLog({
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [hubResponses, setHubResponses] = useState<HubResponse[]>(initialHubResponses);
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
+  const todayCardRef = useRef<DayCardHandle>(null);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== "i") return;
+
+      e.preventDefault();
+      todayCardRef.current?.focusNewInput();
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   async function handleAdd(day: Date, username: string) {
     const now = new Date();
@@ -125,6 +137,7 @@ export function ReviewLog({
             {weekDays.map((day) => (
               <DayCard
                 key={day.toISOString()}
+                ref={isSameDay(day, today) ? todayCardRef : undefined}
                 day={day}
                 isToday={isSameDay(day, today)}
                 reviews={reviews.filter((r) => isSameDay(new Date(r.createdAt), day))}

@@ -73,7 +73,13 @@ export function ReviewRow({
   );
 }
 
-export function NewReviewRow({ onAdd }: { onAdd: (username: string) => void }) {
+export function NewReviewRow({
+  onAdd,
+  inputRef,
+}: {
+  onAdd: (username: string) => void;
+  inputRef?: React.Ref<HTMLInputElement>;
+}) {
   const [username, setUsername] = useState("");
 
   function handleSubmit() {
@@ -91,6 +97,7 @@ export function NewReviewRow({ onAdd }: { onAdd: (username: string) => void }) {
       />
 
       <input
+        ref={inputRef}
         type="text"
         value={username}
         onChange={(e) => setUsername(e.target.value)}

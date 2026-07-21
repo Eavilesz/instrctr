@@ -1,27 +1,54 @@
-import { useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { Review } from "@/app/_lib/types";
 import { WEEKDAYS, formatDayDate } from "@/app/_lib/date";
 import { ReviewRow, NewReviewRow } from "./review-row";
 
-export function DayCard({
-  day,
-  isToday,
-  reviews,
-  onAdd,
-  onToggle,
-  onRemove,
-  onUsernameChange,
-}: {
-  day: Date;
-  isToday: boolean;
-  reviews: Review[];
-  onAdd: (day: Date, username: string) => void;
-  onToggle: (id: string) => void;
-  onRemove: (id: string) => void;
-  onUsernameChange: (id: string, username: string) => void;
-}) {
+export type DayCardHandle = {
+  focusNewInput: () => void;
+};
+
+export const DayCard = forwardRef(function DayCard(
+  {
+    day,
+    isToday,
+    reviews,
+    onAdd,
+    onToggle,
+    onRemove,
+    onUsernameChange,
+  }: {
+    day: Date;
+    isToday: boolean;
+    reviews: Review[];
+    onAdd: (day: Date, username: string) => void;
+    onToggle: (id: string) => void;
+    onRemove: (id: string) => void;
+    onUsernameChange: (id: string, username: string) => void;
+  },
+  ref: React.Ref<DayCardHandle>,
+) {
   const [open, setOpen] = useState(isToday);
   const dayName = WEEKDAYS[day.getDay()];
+  const newInputRef = useRef<HTMLInputElement>(null);
+  const focusAfterOpenRef = useRef(false);
+
+  useImperativeHandle(ref, () => ({
+    focusNewInput() {
+      if (open) {
+        newInputRef.current?.focus();
+      } else {
+        focusAfterOpenRef.current = true;
+        setOpen(true);
+      }
+    },
+  }));
+
+  useEffect(() => {
+    if (open && focusAfterOpenRef.current) {
+      focusAfterOpenRef.current = false;
+      newInputRef.current?.focus();
+    }
+  }, [open]);
 
   return (
     <section className="overflow-hidden rounded-[10px] border border-border bg-surface shadow-[0_1px_2px_rgba(36,38,31,0.04),0_4px_14px_rgba(36,38,31,0.05)] dark:shadow-[0_1px_2px_rgba(0,0,0,0.3),0_8px_20px_rgba(0,0,0,0.25)]">
@@ -78,9 +105,9 @@ export function DayCard({
               onUsernameChange={onUsernameChange}
             />
           ))}
-          <NewReviewRow onAdd={(username) => onAdd(day, username)} />
+          <NewReviewRow inputRef={newInputRef} onAdd={(username) => onAdd(day, username)} />
         </div>
       )}
     </section>
   );
-}
+});
