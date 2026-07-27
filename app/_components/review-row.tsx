@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Review } from "@/app/_lib/types";
 import { formatTime } from "@/app/_lib/date";
+import { useMounted } from "@/app/_lib/use-mounted";
 
 export function ReviewRow({
   review,
@@ -13,6 +14,8 @@ export function ReviewRow({
   onRemove: (id: string) => void;
   onUsernameChange: (id: string, username: string) => void;
 }) {
+  const mounted = useMounted();
+
   return (
     <div className="group flex items-center gap-3 border-b border-border-soft px-4 py-2 last:border-b-0 sm:px-5">
       <button
@@ -58,7 +61,7 @@ export function ReviewRow({
       />
 
       <span className="w-16 shrink-0 text-right font-mono text-[11.5px] text-ink-faint tabular-nums max-sm:hidden">
-        {review.completedAt ? formatTime(new Date(review.completedAt)) : ""}
+        {mounted && review.completedAt ? formatTime(new Date(review.completedAt)) : ""}
       </span>
 
       <button

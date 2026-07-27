@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { Review } from "@/app/_lib/types";
 import { WEEKDAYS, formatDayDate } from "@/app/_lib/date";
+import { useMounted } from "@/app/_lib/use-mounted";
 import { ReviewRow, NewReviewRow } from "./review-row";
 
 export type DayCardHandle = {
@@ -28,6 +29,7 @@ export const DayCard = forwardRef(function DayCard(
   ref: React.Ref<DayCardHandle>,
 ) {
   const [open, setOpen] = useState(isToday);
+  const mounted = useMounted();
   const dayName = WEEKDAYS[day.getDay()];
   const newInputRef = useRef<HTMLInputElement>(null);
   const focusAfterOpenRef = useRef(false);
@@ -82,7 +84,7 @@ export const DayCard = forwardRef(function DayCard(
           )}
           <span className="font-display text-[16px]">{dayName}</span>
           <span className="font-mono text-xs text-ink-soft tabular-nums">
-            {formatDayDate(day)}
+            {mounted ? formatDayDate(day) : null}
           </span>
         </div>
 

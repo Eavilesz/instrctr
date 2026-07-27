@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatMonthLabel, formatWeekRange } from "@/app/_lib/date";
 import { logout } from "@/app/_lib/auth-actions";
+import { useMounted } from "@/app/_lib/use-mounted";
 import { ThemeToggle } from "./theme-toggle";
 
 export function WeekNav({
@@ -16,6 +17,8 @@ export function WeekNav({
   onPrevWeek: () => void;
   onNextWeek: () => void;
 }) {
+  const mounted = useMounted();
+
   return (
     <header className="mb-7 flex flex-wrap items-center justify-between gap-5 border-b border-border pb-6">
       <div className="flex items-center gap-2.5">
@@ -42,10 +45,10 @@ export function WeekNav({
         </button>
         <div className="min-w-[180px] text-center">
           <span className="block text-[10px] font-semibold uppercase tracking-wider text-ink-faint">
-            {formatMonthLabel(weekStart)}
+            {mounted ? formatMonthLabel(weekStart) : null}
           </span>
           <span className="font-display text-base">
-            {formatWeekRange(weekStart)}
+            {mounted ? formatWeekRange(weekStart) : null}
           </span>
         </div>
         <button

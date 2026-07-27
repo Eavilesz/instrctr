@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { HubResponse } from "@/app/_lib/types";
 import { WEEKDAYS, formatDayDate } from "@/app/_lib/date";
+import { useMounted } from "@/app/_lib/use-mounted";
 import { HubResponseRow, NewHubResponseRow } from "./hub-response-row";
 
 export function HubDayCard({
@@ -21,6 +22,7 @@ export function HubDayCard({
   onUsernameChange: (id: string, username: string) => void;
 }) {
   const [open, setOpen] = useState(isToday);
+  const mounted = useMounted();
   const dayName = WEEKDAYS[day.getDay()];
 
   return (
@@ -55,7 +57,7 @@ export function HubDayCard({
           )}
           <span className="font-display text-[16px]">{dayName}</span>
           <span className="font-mono text-xs text-ink-soft tabular-nums">
-            {formatDayDate(day)}
+            {mounted ? formatDayDate(day) : null}
           </span>
         </div>
 
