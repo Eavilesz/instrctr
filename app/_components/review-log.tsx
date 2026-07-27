@@ -8,8 +8,8 @@ import {
   addReview,
   removeHubResponse,
   removeReview,
-  toggleHubResponse,
-  toggleReview,
+  setHubResponseChecked,
+  setReviewDone,
   updateHubResponseUsername,
   updateReviewUsername,
 } from "@/app/_lib/actions";
@@ -53,27 +53,60 @@ export function ReviewLog({
       now.getSeconds(),
     ).toISOString();
 
-    const review = await addReview(createdAt, username);
+    const review: Review = {
+      id: crypto.randomUUID(),
+      username,
+      done: false,
+      createdAt,
+      completedAt: null,
+    };
     setReviews((prev) => [...prev, review]);
+    try {
+      await addReview(review);
+    } catch (error) {
+      console.error(error);
+      setReviews((prev) => prev.filter((r) => r.id !== review.id));
+    }
   }
 
   function handleToggle(id: string) {
+    const current = reviews.find((r) => r.id === id);
+    if (!current) return;
+    const done = !current.done;
     setReviews((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, done: !r.done } : r)),
+      prev.map((r) =>
+        r.id === id
+          ? { ...r, done, completedAt: done ? new Date().toISOString() : null }
+          : r,
+      ),
     );
-    toggleReview(id).catch(console.error);
+    setReviewDone(id, done).catch((error) => {
+      console.error(error);
+      setReviews((prev) => prev.map((r) => (r.id === id ? current : r)));
+    });
   }
 
   function handleRemove(id: string) {
+    const removed = reviews.find((r) => r.id === id);
     setReviews((prev) => prev.filter((r) => r.id !== id));
-    removeReview(id).catch(console.error);
+    removeReview(id).catch((error) => {
+      console.error(error);
+      if (removed) setReviews((prev) => [...prev, removed]);
+    });
   }
 
   function handleUsernameChange(id: string, username: string) {
+    const current = reviews.find((r) => r.id === id);
+    if (!current) return;
     setReviews((prev) =>
       prev.map((r) => (r.id === id ? { ...r, username } : r)),
     );
-    updateReviewUsername(id, username).catch(console.error);
+    updateReviewUsername(id, username).catch((error) => {
+      console.error(error);
+      setReviews((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, username: current.username } : r)),
+      );
+    });
   }
 
   async function handleHubAdd(day: Date, username: string) {
@@ -87,27 +120,60 @@ export function ReviewLog({
       now.getSeconds(),
     ).toISOString();
 
-    const hubResponse = await addHubResponse(createdAt, username);
+    const hubResponse: HubResponse = {
+      id: crypto.randomUUID(),
+      username,
+      checked: false,
+      createdAt,
+      completedAt: null,
+    };
     setHubResponses((prev) => [...prev, hubResponse]);
+    try {
+      await addHubResponse(hubResponse);
+    } catch (error) {
+      console.error(error);
+      setHubResponses((prev) => prev.filter((r) => r.id !== hubResponse.id));
+    }
   }
 
   function handleHubToggle(id: string) {
+    const current = hubResponses.find((r) => r.id === id);
+    if (!current) return;
+    const checked = !current.checked;
     setHubResponses((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, checked: !r.checked } : r)),
+      prev.map((r) =>
+        r.id === id
+          ? { ...r, checked, completedAt: checked ? new Date().toISOString() : null }
+          : r,
+      ),
     );
-    toggleHubResponse(id).catch(console.error);
+    setHubResponseChecked(id, checked).catch((error) => {
+      console.error(error);
+      setHubResponses((prev) => prev.map((r) => (r.id === id ? current : r)));
+    });
   }
 
   function handleHubRemove(id: string) {
+    const removed = hubResponses.find((r) => r.id === id);
     setHubResponses((prev) => prev.filter((r) => r.id !== id));
-    removeHubResponse(id).catch(console.error);
+    removeHubResponse(id).catch((error) => {
+      console.error(error);
+      if (removed) setHubResponses((prev) => [...prev, removed]);
+    });
   }
 
   function handleHubUsernameChange(id: string, username: string) {
+    const current = hubResponses.find((r) => r.id === id);
+    if (!current) return;
     setHubResponses((prev) =>
       prev.map((r) => (r.id === id ? { ...r, username } : r)),
     );
-    updateHubResponseUsername(id, username).catch(console.error);
+    updateHubResponseUsername(id, username).catch((error) => {
+      console.error(error);
+      setHubResponses((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, username: current.username } : r)),
+      );
+    });
   }
 
   const weekDays = getWeekDays(weekStart);
