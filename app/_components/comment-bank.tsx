@@ -31,6 +31,7 @@ export function CommentBank({
 
       e.preventDefault();
       searchInputRef.current?.focus();
+      searchInputRef.current?.select();
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
