@@ -9,11 +9,15 @@ import {
   generateReport,
 } from "@/app/_lib/final-review-report";
 import {
+  deleteReview,
+  getStoredReview,
   saveReview,
-  useStoredReview,
+  setActiveStudent,
+  useInitialReviewData,
   type ReviewStatesByKind,
 } from "@/app/_lib/final-review-storage";
 import { FinalReviewSection } from "./final-review-section";
+import { StudentPicker } from "./student-picker";
 
 function createInitialReviewStates(): ReviewStatesByKind {
   return {
@@ -24,22 +28,82 @@ function createInitialReviewStates(): ReviewStatesByKind {
 
 export function FinalReview() {
   // Reading localStorage can only resolve after the client mounts, so this key
-  // forces a fresh mount of FinalReviewContent once any saved review is found —
+  // forces a fresh mount of FinalReviewShell once any saved data is found —
   // avoiding the SSR hydration mismatch a manual useEffect + setState would cause.
-  const stored = useStoredReview();
+  const initial = useInitialReviewData();
   return (
-    <FinalReviewContent
-      key={stored ? "restored" : "fresh"}
-      initialRubricKind={stored?.rubricKind ?? "regular"}
-      initialReviewStates={stored?.reviewStates}
+    <FinalReviewShell
+      key={initial.activeStudent ?? "fresh"}
+      initialStudentName={initial.activeStudent ?? ""}
+      initialStudentNames={initial.studentNames}
+      initialRubricKind={initial.activeReview?.rubricKind ?? "regular"}
+      initialReviewStates={initial.activeReview?.reviewStates}
     />
   );
 }
 
-function FinalReviewContent({
+function FinalReviewShell({
+  initialStudentName,
+  initialStudentNames,
   initialRubricKind,
   initialReviewStates,
 }: {
+  initialStudentName: string;
+  initialStudentNames: string[];
+  initialRubricKind: RubricKind;
+  initialReviewStates?: ReviewStatesByKind;
+}) {
+  const [studentName, setStudentName] = useState(initialStudentName);
+  const [studentNames, setStudentNames] = useState(initialStudentNames);
+
+  function handleSwitchStudent(name: string) {
+    const trimmed = name.trim();
+    setStudentName(trimmed);
+    if (trimmed) {
+      setStudentNames((prev) => (prev.includes(trimmed) ? prev : [...prev, trimmed].sort()));
+      setActiveStudent(trimmed);
+    }
+  }
+
+  function handleDeleteStudent(name: string) {
+    const confirmed = window.confirm(`Delete ${name}'s review? This can't be undone.`);
+    if (!confirmed) return;
+    deleteReview(name);
+    setStudentNames((prev) => prev.filter((n) => n !== name));
+    if (studentName === name) setStudentName("");
+  }
+
+  // The very first render matches what useInitialReviewData already loaded; subsequent
+  // student switches read fresh from storage since that's a plain post-mount client action.
+  const stored =
+    studentName === initialStudentName
+      ? { rubricKind: initialRubricKind, reviewStates: initialReviewStates }
+      : getStoredReview(studentName);
+
+  return (
+    <>
+      <StudentPicker
+        value={studentName}
+        knownStudents={studentNames}
+        onCommit={handleSwitchStudent}
+        onDelete={handleDeleteStudent}
+      />
+      <FinalReviewContent
+        key={studentName || "unnamed"}
+        studentName={studentName}
+        initialRubricKind={stored?.rubricKind ?? "regular"}
+        initialReviewStates={stored?.reviewStates}
+      />
+    </>
+  );
+}
+
+function FinalReviewContent({
+  studentName,
+  initialRubricKind,
+  initialReviewStates,
+}: {
+  studentName: string;
   initialRubricKind: RubricKind;
   initialReviewStates?: ReviewStatesByKind;
 }) {
@@ -64,8 +128,8 @@ function FinalReviewContent({
       skipNextSave.current = false;
       return;
     }
-    saveReview(rubricKind, reviewStates);
-  }, [rubricKind, reviewStates]);
+    saveReview(studentName, rubricKind, reviewStates);
+  }, [studentName, rubricKind, reviewStates]);
 
   function handleToggle(id: string) {
     setReviewStates((prev) => ({
