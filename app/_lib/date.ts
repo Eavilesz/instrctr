@@ -4,12 +4,14 @@ export const WEEKDAYS = [
   "Tuesday",
   "Wednesday",
   "Thursday",
+  "Friday",
+  "Saturday",
 ] as const;
 
-/** Most recent Sunday on or before `date`, at local midnight. */
+/** Most recent Saturday on or before `date`, at local midnight. */
 export function startOfWeek(date: Date): Date {
   const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  d.setDate(d.getDate() - d.getDay());
+  d.setDate(d.getDate() - ((d.getDay() + 1) % 7));
   return d;
 }
 
@@ -19,7 +21,7 @@ export function addDays(date: Date, days: number): Date {
   return d;
 }
 
-/** The five review days (Sunday–Thursday) starting at `weekStart`. */
+/** The five review days (Saturday–Wednesday) starting at `weekStart`. */
 export function getWeekDays(weekStart: Date): Date[] {
   return Array.from({ length: 5 }, (_, i) => addDays(weekStart, i));
 }
