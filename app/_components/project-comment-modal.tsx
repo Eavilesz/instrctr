@@ -21,9 +21,23 @@ export function ProjectCommentModal() {
   }, []);
 
   function open() {
-    dialogRef.current?.showModal();
+    const dialog = dialogRef.current;
+    if (!dialog || dialog.open) return;
+    dialog.showModal();
     nameInputRef.current?.focus();
   }
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== "k") return;
+
+      // Browsers bind Ctrl+K to their own search bar.
+      e.preventDefault();
+      open();
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   function close() {
     dialogRef.current?.close();
@@ -50,6 +64,7 @@ export function ProjectCommentModal() {
       <button
         type="button"
         onClick={open}
+        title="Ctrl + K"
         className="flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-surface shadow-sm transition-opacity hover:opacity-90"
       >
         <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="none" aria-hidden="true">
