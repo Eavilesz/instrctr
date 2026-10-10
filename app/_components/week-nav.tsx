@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatMonthLabel, formatWeekRange } from "@/app/_lib/date";
 import { logout } from "@/app/_lib/auth-actions";
 import { useMounted } from "@/app/_lib/use-mounted";
+import { ProjectCommentModal } from "./project-comment-modal";
 import { ThemeToggle } from "./theme-toggle";
 
 export function WeekNav({
@@ -32,6 +33,7 @@ export function WeekNav({
         >
           Final Review
         </Link>
+        <ProjectCommentModal />
       </div>
 
       <div className="flex items-center gap-3.5">
