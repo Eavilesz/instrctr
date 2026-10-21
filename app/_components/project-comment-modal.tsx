@@ -44,7 +44,10 @@ export function ProjectCommentModal() {
   }
 
   function handleCopy() {
-    const comment = generateProjectComment(studentName, parseDoneWell(doneWell));
+    const comment = generateProjectComment(
+      studentName,
+      parseDoneWell(doneWell),
+    );
     navigator.clipboard
       .writeText(comment)
       .then(() => {
@@ -67,7 +70,12 @@ export function ProjectCommentModal() {
         title="Ctrl + K"
         className="flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-surface shadow-sm transition-opacity hover:opacity-90"
       >
-        <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="none" aria-hidden="true">
+        <svg
+          viewBox="0 0 20 20"
+          className="h-3.5 w-3.5"
+          fill="none"
+          aria-hidden="true"
+        >
           <path
             d="M3 4.5A1.5 1.5 0 0 1 4.5 3h11A1.5 1.5 0 0 1 17 4.5v8a1.5 1.5 0 0 1-1.5 1.5H8l-4 3v-3h0A1.5 1.5 0 0 1 3 12.5v-8Z"
             stroke="currentColor"
@@ -95,24 +103,23 @@ export function ProjectCommentModal() {
             onClick={close}
             className="flex h-6 w-6 items-center justify-center rounded-md text-ink-soft transition-colors hover:bg-surface hover:text-foreground"
           >
-            <svg viewBox="0 0 10 10" className="h-2.5 w-2.5" fill="none" aria-hidden="true">
-              <path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <svg
+              viewBox="0 0 10 10"
+              className="h-2.5 w-2.5"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M2 2l6 6M8 2l-6 6"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
           </button>
         </div>
 
         <div className="flex flex-col gap-4 px-5 py-4">
-          <label className="flex flex-col gap-1.5 text-xs font-medium text-ink-soft">
-            Student name
-            <input
-              ref={nameInputRef}
-              value={studentName}
-              onChange={(e) => setStudentName(e.target.value)}
-              placeholder="student"
-              className="rounded-md border border-border bg-surface px-2.5 py-1.5 text-sm font-normal text-foreground outline-none focus:border-accent"
-            />
-          </label>
-
           <label className="flex flex-col gap-1.5 text-xs font-medium text-ink-soft">
             Things done well
             <textarea
@@ -121,6 +128,17 @@ export function ProjectCommentModal() {
               rows={8}
               placeholder="One per line"
               className="resize-y rounded-md border border-border bg-surface px-2.5 py-1.5 text-sm font-normal leading-relaxed text-foreground outline-none focus:border-accent"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1.5 text-xs font-medium text-ink-soft">
+            Student name
+            <input
+              ref={nameInputRef}
+              value={studentName}
+              onChange={(e) => setStudentName(e.target.value)}
+              placeholder="student"
+              className="rounded-md border border-border bg-surface px-2.5 py-1.5 text-sm font-normal text-foreground outline-none focus:border-accent"
             />
           </label>
         </div>
@@ -150,8 +168,19 @@ export function ProjectCommentModal() {
           copied ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
         }`}
       >
-        <svg viewBox="0 0 12 12" className="h-3.5 w-3.5" fill="none" aria-hidden="true">
-          <path d="M2 6.2 4.8 9 10 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <svg
+          viewBox="0 0 12 12"
+          className="h-3.5 w-3.5"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M2 6.2 4.8 9 10 3"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
         Comment copied to clipboard
       </div>
