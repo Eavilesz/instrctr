@@ -8,7 +8,7 @@ import {
 
 export function ProjectCommentModal() {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const nameInputRef = useRef<HTMLInputElement>(null);
+  const doneWellRef = useRef<HTMLTextAreaElement>(null);
   const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [studentName, setStudentName] = useState("");
   const [doneWell, setDoneWell] = useState("");
@@ -24,7 +24,7 @@ export function ProjectCommentModal() {
     const dialog = dialogRef.current;
     if (!dialog || dialog.open) return;
     dialog.showModal();
-    nameInputRef.current?.focus();
+    doneWellRef.current?.focus();
   }
 
   useEffect(() => {
@@ -123,6 +123,7 @@ export function ProjectCommentModal() {
           <label className="flex flex-col gap-1.5 text-xs font-medium text-ink-soft">
             Things done well
             <textarea
+              ref={doneWellRef}
               value={doneWell}
               onChange={(e) => setDoneWell(e.target.value)}
               rows={8}
@@ -134,7 +135,6 @@ export function ProjectCommentModal() {
           <label className="flex flex-col gap-1.5 text-xs font-medium text-ink-soft">
             Student name
             <input
-              ref={nameInputRef}
               value={studentName}
               onChange={(e) => setStudentName(e.target.value)}
               placeholder="student"
